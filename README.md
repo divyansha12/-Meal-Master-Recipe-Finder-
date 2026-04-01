@@ -12,6 +12,13 @@
 - **Responsive Design**: Built with modern CSS Grid and Flexbox for a seamless experience on all devices.
 - **Smooth Animations**: Subtle transitions and micro-interactions for a premium feel.
 
+## 📸 Visual Gallery
+
+![Hero Banner](assets/screenshots/hero.png)
+![Best Recipes](assets/screenshots/best_recipes.png)
+![Banner Detail](assets/screenshots/banner.png)
+![Footer](assets/screenshots/footer.png)
+
 ## 🛠️ Tech Stack
 
 - **Framework**: React 18
