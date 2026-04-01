@@ -1,0 +1,116 @@
+/* ============================================================
+   MEAL MASTER — dark.css
+   Light Mode Theme Overrides
+
+   HOW THIS WORKS:
+   Our style.css defines dark mode as the DEFAULT (all the
+   --color-* variables are dark colors).
+
+   This file redefines those SAME variable names but with
+   light values. Since these rules apply when body does NOT
+   have the .dark-mode class, removing .dark-mode from body
+   automatically switches every element to light mode.
+
+   We NEVER have to change any individual element's color —
+   just the variables. This is the power of CSS variables.
+
+   JS (FavController.js) will:
+   1. Read saved theme from localStorage
+   2. Add or remove .dark-mode on document.body
+   3. Toggle between these two variable sets
+============================================================ */
+
+/*
+  body:not(.dark-mode) means:
+  "apply these styles when body does NOT have the class dark-mode"
+  
+  This targets the :root (html element) through body context,
+  so all CSS variables are redefined for the whole document.
+*/
+body:not(.dark-mode) {
+
+  /* Backgrounds — flip to light */
+  --color-bg-primary:   #f8f4ef;   /* warm off-white — not pure white (too harsh) */
+  --color-bg-secondary: #ffffff;   /* cards — pure white */
+  --color-bg-tertiary:  #f0ece6;   /* inputs — slightly warm grey */
+  --color-bg-glass:     rgba(0, 0, 0, 0.03); /* glass effect on light bg */
+
+  /* Text — flip to dark */
+  --color-text-primary:  #1a1614;  /* near black — warm, not cold */
+  --color-text-secondary:#5a5250;  /* medium grey */
+  --color-text-muted:    #9c9290;  /* light grey */
+
+  /* Borders — more visible on light bg */
+  --color-border:        rgba(0, 0, 0, 0.08);
+  --color-border-hover:  rgba(0, 0, 0, 0.18);
+
+  /* Accent stays the same orange — works on both themes */
+  /* --color-accent: #ff6b35; ← no change needed */
+
+  /* Shadow is darker on light bg (opposite of dark mode) */
+  --shadow-card:  0 4px 24px rgba(0, 0, 0, 0.12);
+  --shadow-modal: 0 8px 48px rgba(0, 0, 0, 0.25);
+}
+
+/* Background blobs are too bright in light mode — tone them down */
+body:not(.dark-mode) .blob {
+  opacity: 0.06; /* was 0.15 in dark mode */
+}
+
+/* Navbar background for light mode */
+body:not(.dark-mode) .navbar {
+  background: rgba(248, 244, 239, 0.85);
+  border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+/* Filter bar for light mode */
+body:not(.dark-mode) .filter-bar {
+  background: rgba(248, 244, 239, 0.9);
+}
+
+/* Cards get a subtle shadow in light mode (they had none needed in dark) */
+body:not(.dark-mode) .meal-card {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* Skeleton shimmer on light bg */
+body:not(.dark-mode) .skeleton-img,
+body:not(.dark-mode) .skeleton-line {
+  background: linear-gradient(
+    90deg,
+    #e8e4df 25%,
+    #f0ece8 50%,
+    #e8e4df 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Body background for light mode */
+body:not(.dark-mode) {
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(255, 107, 53, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(245, 200, 66, 0.04) 0%, transparent 50%);
+}
+
+/* Modal in light mode */
+body:not(.dark-mode) .modal {
+  background: #ffffff;
+}
+
+/* Sidebar in light mode */
+body:not(.dark-mode) .sidebar {
+  background: #ffffff;
+}
+
+/* Select dropdown in light mode — fix browser default dark background */
+body:not(.dark-mode) .filter-select {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+}
+
+/* Toast in light mode */
+body:not(.dark-mode) .toast {
+  background: #ffffff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}

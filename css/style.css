@@ -1,0 +1,1907 @@
+/* ============================================================
+   MEAL MASTER — style.css
+   Dark Premium Glassmorphism UI
+   
+   FILE ORDER (important — CSS cascades top to bottom):
+   1.  CSS Variables (design tokens)
+   2.  Reset & Base
+   3.  Typography
+   4.  Animations (keyframes defined early, used later)
+   5.  Navbar
+   6.  Hero Section
+   7.  Filter Bar
+   8.  Cards Grid
+   9.  Meal Card
+   10. Skeleton Loaders
+   11. Modal
+   12. Sidebars
+   13. Toast Notifications
+   14. Pagination
+   15. Empty State
+   16. Utilities
+   17. Responsive (media queries)
+============================================================ */
+
+
+/* ============================================================
+   1. CSS VARIABLES — THE DESIGN SYSTEM
+   
+   :root means "the very top of the document" — the <html> element.
+   Variables defined here are accessible EVERYWHERE in the CSS
+   using var(--variable-name).
+   
+   WHY USE VARIABLES?
+   If you hardcode a color 50 times and need to change it,
+   you edit 50 places. With variables, you edit ONE line.
+   This is also how dark mode works — we just redefine the
+   variables in dark.css and every element updates automatically.
+============================================================ */
+:root {
+
+  /* ── Color Palette ── */
+  --color-bg-primary:    #0d0d0f;   /* main background — near black */
+  --color-bg-secondary:  #141418;   /* cards, panels background */
+  --color-bg-tertiary:   #1c1c22;   /* inputs, dropdowns */
+  --color-bg-glass:      rgba(255, 255, 255, 0.04); /* glassmorphism card fill */
+
+  --color-accent:        #ff6b35;   /* primary orange-red — food/appetite */
+  --color-accent-hover:  #ff8c5a;   /* lighter accent on hover */
+  --color-accent-glow:   rgba(255, 107, 53, 0.25); /* glow effect color */
+
+  --color-gold:          #f5c842;   /* star ratings, premium badges */
+  --color-success:       #4caf7d;   /* saved/added confirmations */
+  --color-danger:        #f05252;   /* remove/delete actions */
+
+  --color-text-primary:  #f0ece4;   /* main body text — warm white (not pure white, easier on eyes) */
+  --color-text-secondary:#a09898;   /* subtitles, labels */
+  --color-text-muted:    #5c5858;   /* placeholder text, disabled */
+
+  --color-border:        rgba(255, 255, 255, 0.08); /* subtle divider lines */
+  --color-border-hover:  rgba(255, 255, 255, 0.15); /* border on hover */
+
+  /* ── Typography ── */
+  --font-display: 'Playfair Display', Georgia, serif;  /* headings */
+  --font-body:    'DM Sans', -apple-system, sans-serif; /* body text */
+
+  /* ── Spacing Scale ──
+     Using multiples of 4px is a common design system practice.
+     This creates visual harmony — everything "lines up".
+  */
+  --space-xs:   4px;
+  --space-sm:   8px;
+  --space-md:   16px;
+  --space-lg:   24px;
+  --space-xl:   32px;
+  --space-2xl:  48px;
+  --space-3xl:  64px;
+
+  /* ── Border Radius ── */
+  --radius-sm:  6px;
+  --radius-md:  12px;
+  --radius-lg:  20px;
+  --radius-xl:  32px;
+  --radius-full: 9999px; /* perfect pill/circle */
+
+  /* ── Shadows ── */
+  --shadow-card:  0 4px 24px rgba(0, 0, 0, 0.4);
+  --shadow-modal: 0 8px 48px rgba(0, 0, 0, 0.7);
+  --shadow-glow:  0 0 32px var(--color-accent-glow);
+
+  /* ── Transitions ──
+     "all 0.3s ease" means: animate any changing property over 0.3 seconds
+     with an ease curve (starts fast, slows down — feels natural).
+     We define it as a variable so every hover effect feels consistent.
+  */
+  --transition-fast:   all 0.2s ease;
+  --transition-normal: all 0.3s ease;
+  --transition-slow:   all 0.5s ease;
+
+  /* ── Layout ── */
+  --navbar-height: 70px;
+  --sidebar-width: 380px;
+  --max-width:     1280px;
+}
+
+
+/* ============================================================
+   2. RESET & BASE STYLES
+   
+   Browsers have their own default CSS (called "user agent stylesheet").
+   Chrome adds margin to body. Firefox styles buttons differently.
+   This "reset" removes all those inconsistencies so we start fresh.
+============================================================ */
+
+/* Universal box-sizing reset
+   By default, CSS box model adds padding/border ON TOP of width.
+   So a 200px div with 20px padding = 240px actual width. Confusing!
+   box-sizing: border-box means: padding is INCLUDED in the width.
+   200px div with 20px padding = still 200px. Much more predictable.
+   The * selector targets EVERY element.
+   *::before and *::after target pseudo-elements (used for decorations).
+*/
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;    /* remove default browser margins */
+  padding: 0;   /* remove default browser padding */
+}
+
+/* HTML element — sets font size base.
+   1rem = 16px by default. We use rem throughout for accessibility:
+   if the user increases their browser font size, everything scales.
+*/
+html {
+  font-size: 16px;
+  scroll-behavior: smooth; /* smooth scroll when navigating to anchors */
+}
+
+/* Body — base styles applied to everything */
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  line-height: 1.6; /* space between lines — 1.6x the font size */
+  min-height: 100vh; /* always at least full viewport height */
+  overflow-x: hidden; /* prevent horizontal scroll from animations */
+
+  /* Subtle animated background — we'll define this keyframe later */
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(255, 107, 53, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(245, 200, 66, 0.03) 0%, transparent 50%);
+}
+
+/* Remove default list styling */
+ul, ol {
+  list-style: none;
+}
+
+/* Make images responsive by default */
+img {
+  max-width: 100%;   /* never overflow their container */
+  display: block;    /* removes the mysterious 4px gap below inline images */
+}
+
+/* Remove default button styles */
+button {
+  cursor: pointer;  /* show hand cursor on hover */
+  border: none;
+  background: none;
+  font-family: var(--font-body); /* buttons inherit our font, not browser default */
+}
+
+/* Remove default link underline */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+
+/* ============================================================
+   3. TYPOGRAPHY
+============================================================ */
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  line-height: 1.2; /* tighter line height for headings */
+  color: var(--color-text-primary);
+}
+
+/* Selection highlight — when user drags to select text */
+::selection {
+  background: var(--color-accent);
+  color: white;
+}
+
+
+/* ============================================================
+   4. KEYFRAME ANIMATIONS
+   
+   @keyframes defines the animation steps.
+   You give it a name, then use it with: animation: name duration easing
+   
+   Think of keyframes like frames in a video — 
+   from (0%) is the start, to (100%) is the end.
+============================================================ */
+
+/* Fade in + slide up — used for cards appearing */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px); /* start 24px below final position */
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);    /* end at final position */
+  }
+}
+
+/* Fade in — simple opacity transition */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Slide in from right — for sidebars */
+@keyframes slideInRight {
+  from { transform: translateX(100%); } /* start fully off-screen right */
+  to   { transform: translateX(0); }
+}
+
+/* Slide in from bottom — for modal on mobile */
+@keyframes slideInUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+/* Pulse glow — for the surprise me button */
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 20px var(--color-accent-glow); }
+  50%       { box-shadow: 0 0 40px var(--color-accent-glow), 0 0 80px var(--color-accent-glow); }
+}
+
+/* Float up-down — for blob shapes in hero */
+@keyframes float {
+  0%, 100% { transform: translateY(0)    rotate(0deg); }
+  33%       { transform: translateY(-20px) rotate(5deg); }
+  66%       { transform: translateY(10px)  rotate(-3deg); }
+}
+
+/* Shimmer — for skeleton loading cards */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+/* Spin — for loading spinner */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Scale pop — for toast notifications appearing */
+@keyframes popIn {
+  0%   { transform: scale(0.8) translateY(10px); opacity: 0; }
+  70%  { transform: scale(1.05); }
+  100% { transform: scale(1) translateY(0);    opacity: 1; }
+}
+
+/* Dice roll — for surprise me button icon */
+@keyframes diceRoll {
+  0%   { transform: rotate(0deg)   scale(1); }
+  25%  { transform: rotate(90deg)  scale(1.2); }
+  50%  { transform: rotate(180deg) scale(0.9); }
+  75%  { transform: rotate(270deg) scale(1.1); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+/* Heart beat — for favourite button */
+@keyframes heartBeat {
+  0%  { transform: scale(1); }
+  14% { transform: scale(1.3); }
+  28% { transform: scale(1); }
+  42% { transform: scale(1.2); }
+  70% { transform: scale(1); }
+}
+
+
+/* ============================================================
+   5. NAVBAR
+============================================================ */
+
+.navbar {
+  position: fixed;       /* stays at top even when scrolling */
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--navbar-height);
+  z-index: 1000;         /* always on top of other elements */
+
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: 0 var(--space-xl);
+
+  /* Glassmorphism effect:
+     backdrop-filter: blur blurs EVERYTHING behind this element.
+     background with low opacity lets the blurred content show through.
+     This creates the frosted glass look.
+  */
+  background: rgba(13, 13, 15, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px); /* Safari prefix */
+  border-bottom: 1px solid var(--color-border);
+
+  /* Animate navbar appearing on page load */
+  animation: fadeIn 0.6s ease forwards;
+}
+
+/* Logo */
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-shrink: 0; /* don't let logo shrink when space is tight */
+}
+
+.nav-logo-icon {
+  font-size: 1.6rem;
+
+  /* Filter to give the emoji a slight orange tint */
+  filter: drop-shadow(0 0 8px var(--color-accent-glow));
+}
+
+.nav-logo-text {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em; /* slightly tighter — looks more premium */
+}
+
+.nav-logo-text strong {
+  color: var(--color-accent);
+}
+
+/* Search wrapper — positions icon inside the input */
+.search-wrapper {
+  flex: 1;              /* takes up all available space in navbar */
+  max-width: 480px;
+  position: relative;  /* needed so we can position search icon absolutely inside */
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%); /* vertically center the icon */
+  color: var(--color-text-muted);
+  pointer-events: none; /* clicks pass through to the input behind it */
+  transition: var(--transition-fast);
+}
+
+.search-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 40px 0 44px; /* left padding accommodates the search icon */
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  color: var(--color-text-primary);
+  font-size: 0.9rem;
+  font-family: var(--font-body);
+  transition: var(--transition-normal);
+  outline: none; /* remove browser default blue outline */
+}
+
+/* When user clicks into search input */
+.search-input:focus {
+  border-color: var(--color-accent);
+  background: var(--color-bg-secondary);
+  /* Glow effect on focus — draws attention */
+  box-shadow: 0 0 0 3px var(--color-accent-glow);
+}
+
+/* Placeholder text */
+.search-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* When search is focused, make the icon orange too */
+.search-wrapper:focus-within .search-icon {
+  color: var(--color-accent);
+}
+
+/* Clear button — X button inside search */
+.search-clear {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: var(--transition-fast);
+  opacity: 0;          /* hidden by default */
+  pointer-events: none;
+}
+
+/* Show clear button when input has the "has-value" class (added by JS) */
+.search-input.has-value ~ .search-clear {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.search-clear:hover {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+}
+
+/* Nav controls — right side icons */
+.nav-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-shrink: 0;
+}
+
+/* Icon buttons in navbar */
+.btn-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  transition: var(--transition-fast);
+  position: relative; /* for the fav-count badge positioning */
+}
+
+.btn-icon:hover {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  transform: translateY(-1px); /* subtle lift on hover */
+}
+
+/* ── Animated pill theme toggle ── */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  height: 40px;
+}
+
+.theme-toggle:hover {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-accent-glow);
+}
+
+.theme-toggle-icon {
+  font-size: 0.85rem;
+  line-height: 1;
+  user-select: none;
+}
+
+/* The pill track */
+.theme-toggle-track {
+  width: 36px;
+  height: 20px;
+  background: var(--color-accent);
+  border-radius: var(--radius-full);
+  position: relative;
+  transition: background 0.3s ease;
+  flex-shrink: 0;
+}
+
+/* The sliding thumb */
+.theme-toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 14px;
+  height: 14px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.35);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* In light mode the thumb slides to the right */
+body:not(.dark-mode) .theme-toggle-thumb {
+  transform: translateX(16px);
+}
+
+/* Track color changes per mode */
+body:not(.dark-mode) .theme-toggle-track {
+  background: #f5c842; /* gold/yellow in light mode */
+}
+
+/* Favourite counter badge */
+.fav-count {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 16px;
+  height: 16px;
+  background: var(--color-accent);
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+
+  /* Hide when count is 0 — JS adds/removes this class */
+  opacity: 0;
+  transform: scale(0);
+  transition: var(--transition-fast);
+}
+
+.fav-count.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+
+/* ============================================================
+   6. HERO SECTION
+============================================================ */
+
+.hero {
+  min-height: 100vh;         /* full viewport height */
+  padding-top: var(--navbar-height); /* push content below navbar */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;        /* for blob positioning */
+  overflow: hidden;          /* blobs won't cause horizontal scroll */
+  text-align: center;
+}
+
+/* Animated background blobs
+   These are large blurred circles that slowly float around.
+   They create depth and visual interest without being distracting.
+*/
+.hero-blobs {
+  position: absolute;
+  inset: 0; /* shorthand for top:0; right:0; bottom:0; left:0 */
+  pointer-events: none; /* clicks pass through to content behind */
+  z-index: 0;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px); /* heavy blur makes them soft and atmospheric */
+  opacity: 0.15;
+}
+
+.blob-1 {
+  width: 600px;
+  height: 600px;
+  background: var(--color-accent);
+  top: -100px;
+  left: -200px;
+  animation: float 8s ease-in-out infinite; /* slow, dreamlike float */
+}
+
+.blob-2 {
+  width: 400px;
+  height: 400px;
+  background: var(--color-gold);
+  bottom: -50px;
+  right: -100px;
+  animation: float 11s ease-in-out infinite reverse; /* reverse = floats opposite */
+}
+
+.blob-3 {
+  width: 300px;
+  height: 300px;
+  background: #7c3aed; /* purple — adds color variety */
+  top: 40%;
+  left: 60%;
+  animation: float 9s ease-in-out infinite 2s; /* 2s delay = offset timing */
+}
+
+/* Hero content sits above the blobs */
+.hero-content {
+  position: relative;
+  z-index: 1;           /* above the blobs (z-index: 0) */
+  max-width: 700px;
+  padding: var(--space-xl);
+
+  /* Stagger the animation of child elements using animation-delay */
+  animation: fadeInUp 0.8s ease forwards;
+}
+
+.hero-eyebrow {
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.15em; /* widely spaced = luxury feel */
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: var(--space-md);
+
+  /* Animate slightly after the container */
+  animation: fadeInUp 0.8s ease 0.1s both;
+  /*
+    0.8s = duration
+    ease = easing curve
+    0.1s = delay (starts 0.1s after parent)
+    both = apply initial styles before animation starts (prevents flash)
+  */
+}
+
+.hero-title {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  /*
+    clamp(min, preferred, max)
+    min: never smaller than 2.5rem
+    preferred: 6% of viewport width (scales with screen)
+    max: never larger than 4.5rem
+    This is RESPONSIVE TYPOGRAPHY without media queries.
+  */
+  font-weight: 900;
+  line-height: 1.1;
+  margin-bottom: var(--space-md);
+  animation: fadeInUp 0.8s ease 0.2s both;
+}
+
+/* The "You'll Love" part in orange */
+.hero-title-accent {
+  display: block;           /* forces line break before it */
+  color: var(--color-accent);
+  -webkit-text-stroke: 1px var(--color-accent); /* outline stroke for premium effect */
+}
+
+.hero-subtitle {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-xl);
+  animation: fadeInUp 0.8s ease 0.3s both;
+}
+
+/* Lifestyle filter chips */
+.hero-chips {
+  display: flex;
+  flex-wrap: wrap;          /* wrap to next line if too many */
+  gap: var(--space-sm);
+  justify-content: center;
+  margin-bottom: var(--space-xl);
+  animation: fadeInUp 0.8s ease 0.4s both;
+}
+
+.chip {
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-weight: 500;
+  background: var(--color-bg-glass);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  transition: var(--transition-fast);
+  backdrop-filter: blur(10px); /* glassmorphism on the chips */
+}
+
+.chip:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--color-accent-glow);
+}
+
+/* Active chip — currently selected filter */
+.chip-active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: white;
+}
+
+/* Surprise Me button */
+.btn-surprise {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-xl);
+  background: var(--color-accent);
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  transition: var(--transition-normal);
+
+  /* Continuous glow pulse — draws attention */
+  animation:
+    fadeInUp 0.8s ease 0.5s both,
+    pulseGlow 3s ease-in-out infinite 1s;
+}
+
+.btn-surprise:hover {
+  background: var(--color-accent-hover);
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 8px 30px var(--color-accent-glow);
+}
+
+/* When surprise button is clicked, spin the dice */
+.btn-surprise.loading .surprise-dice {
+  animation: diceRoll 0.6s ease;
+}
+
+
+/* ============================================================
+   7. FILTER BAR
+============================================================ */
+
+.filter-bar {
+  position: sticky;
+  top: var(--navbar-height); /* sticks just below navbar */
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  padding: var(--space-md) var(--space-xl);
+  background: rgba(13, 13, 15, 0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--color-border);
+  flex-wrap: wrap;
+
+  /* Initially hidden — JS shows it when results are available */
+  /* We handle hide/show with the .hidden utility class */
+}
+
+.filter-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+  display: block;
+}
+
+/* Custom select dropdown wrapper —
+   Browsers make styling <select> hard, so we wrap it
+   and add our own arrow indicator using a pseudo-element.
+*/
+.select-wrapper {
+  position: relative;
+}
+
+/* Custom dropdown arrow using ::after pseudo-element */
+.select-wrapper::after {
+  content: '▾';   /* down-pointing triangle character */
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  pointer-events: none; /* don't block clicks on the select */
+  font-size: 0.8rem;
+}
+
+.filter-select {
+  appearance: none;  /* remove browser default styling */
+  -webkit-appearance: none;
+  height: 38px;
+  padding: 0 32px 0 12px; /* right padding for the arrow */
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-size: 0.875rem;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  min-width: 160px;
+  outline: none;
+}
+
+.filter-select:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-glow);
+}
+
+/* Sort buttons */
+.sort-btns {
+  display: flex;
+  gap: 4px;
+}
+
+.sort-btn {
+  height: 38px;
+  padding: 0 var(--space-md);
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  transition: var(--transition-fast);
+}
+
+.sort-btn:hover {
+  border-color: var(--color-border-hover);
+  color: var(--color-text-primary);
+}
+
+.sort-btn-active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: white;
+}
+
+.results-meta {
+  margin-left: auto; /* push to the right */
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+
+/* ============================================================
+   8. MAIN CONTENT & CARDS GRID
+============================================================ */
+
+.main-content {
+  max-width: var(--max-width);
+  margin: 0 auto;   /* center horizontally */
+  padding: var(--space-xl);
+  min-height: calc(100vh - var(--navbar-height)); /* at least full screen height */
+}
+
+/* CSS Grid for meal cards
+   auto-fill: create as many columns as fit
+   minmax(280px, 1fr): each column is at least 280px, max 1 fraction
+   This gives us automatic responsive columns — no media queries needed!
+   On wide screen: 4 columns. On tablet: 2-3. On mobile: 1.
+*/
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-lg);
+  padding-top: var(--space-xl);
+}
+
+
+/* ============================================================
+   9. MEAL CARD
+============================================================ */
+
+.meal-card {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;  /* so image doesn't bleed outside rounded corners */
+  cursor: pointer;
+  transition: var(--transition-normal);
+  position: relative;
+
+  /* Cards animate in staggered — JS adds inline animation-delay */
+  animation: fadeInUp 0.5s ease both;
+}
+
+/* Card hover — lift + glow effect */
+.meal-card:hover {
+  transform: translateY(-8px);
+  border-color: var(--color-border-hover);
+  box-shadow: var(--shadow-card), 0 0 0 1px rgba(255, 107, 53, 0.2);
+}
+
+/* Card image wrapper — handles the overlay on hover */
+.card-img-wrapper {
+  position: relative;
+  aspect-ratio: 4/3; /* consistent image height regardless of image dimensions */
+  overflow: hidden;
+}
+
+.card-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* crop image to fill, never stretch */
+  transition: transform 0.6s ease; /* smooth zoom on hover */
+}
+
+/* Zoom in image when card is hovered */
+.meal-card:hover .card-img-wrapper img {
+  transform: scale(1.08);
+}
+
+/* Dark overlay on image — appears on hover */
+.card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 40%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
+  /*
+    linear-gradient goes from top to bottom.
+    transparent at top — shows the image.
+    Dark at bottom — text can sit here and still be readable.
+  */
+  opacity: 0;
+  transition: var(--transition-normal);
+}
+
+.meal-card:hover .card-overlay {
+  opacity: 1;
+}
+
+/* Quick action buttons that appear on card hover */
+.card-actions {
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-sm);
+  display: flex;
+  gap: var(--space-xs);
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: var(--transition-normal);
+}
+
+.meal-card:hover .card-actions {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.card-action-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  color: white;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-fast);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.card-action-btn:hover {
+  background: var(--color-accent);
+  transform: scale(1.1);
+}
+
+/* Favourite button active state */
+.card-action-btn.is-fav {
+  background: var(--color-accent);
+  animation: heartBeat 0.6s ease;
+}
+
+/* Card body text area */
+.card-body {
+  padding: var(--space-md);
+}
+
+.card-title {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: var(--space-xs);
+  /* Clamp to 2 lines — prevents super long titles breaking layout */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
+}
+
+.card-meta {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Category and area badges */
+.card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.7rem;
+  font-weight: 500;
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+}
+
+.card-badge-accent {
+  background: var(--color-accent-glow);
+  border-color: rgba(255, 107, 53, 0.3);
+  color: var(--color-accent);
+}
+
+/* Veg / Non-veg dot on card image */
+.card-veg-dot,
+.card-nonveg-dot {
+  position: absolute;
+  bottom: var(--space-sm);
+  left: var(--space-sm);
+  font-size: 0.65rem;
+  line-height: 1;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(6px);
+  border-radius: var(--radius-full);
+  padding: 2px 5px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+
+/* ============================================================
+   10. SKELETON LOADER CARDS
+   
+   Skeletons are placeholder cards shown WHILE data is loading.
+   They have the same shape as real cards but with animated
+   shimmer instead of content. This is much better UX than
+   a spinning circle — user sees the layout before data arrives.
+============================================================ */
+
+.skeleton-card {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  animation: fadeInUp 0.5s ease both;
+}
+
+/* The shimmer element
+   background-size: 200% — the gradient is twice as wide as the element
+   animation moves it from left to right, creating the shimmer
+*/
+.skeleton-img {
+  aspect-ratio: 4/3;
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-tertiary) 25%,
+    rgba(255, 255, 255, 0.04) 50%,
+    var(--color-bg-tertiary) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeleton-body {
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+/* Skeleton lines — represent text */
+.skeleton-line {
+  height: 14px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-tertiary) 25%,
+    rgba(255, 255, 255, 0.04) 50%,
+    var(--color-bg-tertiary) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeleton-line-short { width: 60%; }
+.skeleton-line-long  { width: 100%; }
+.skeleton-line-mid   { width: 80%; }
+
+
+/* ============================================================
+   11. MODAL
+============================================================ */
+
+/* Full-screen overlay behind modal */
+.modal-overlay {
+  position: fixed;  /* fixed = stays in place while page scrolls */
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  z-index: 2000;    /* above everything */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl);
+  animation: fadeIn 0.3s ease;
+  overflow-y: auto; /* scroll if modal is taller than viewport */
+}
+
+/* The actual modal box */
+.modal {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  width: 100%;
+  max-width: 720px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: var(--shadow-modal);
+  animation: fadeInUp 0.4s ease;
+}
+
+/* Scrollbar styling inside modal */
+.modal::-webkit-scrollbar {
+  width: 4px;
+}
+
+.modal::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal::-webkit-scrollbar-thumb {
+  background: var(--color-border-hover);
+  border-radius: var(--radius-full);
+}
+
+/* Close button */
+.modal-close {
+  position: absolute;
+  top: var(--space-md);
+  right: var(--space-md);
+  z-index: 10;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-fast);
+  backdrop-filter: blur(10px);
+}
+
+.modal-close:hover {
+  background: var(--color-danger);
+  transform: rotate(90deg); /* spin on hover — satisfying UX */
+}
+
+/* Modal hero image area */
+.modal-hero {
+  position: relative;
+  aspect-ratio: 16/9;
+  overflow: hidden;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0; /* only top corners */
+}
+
+.modal-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.8s ease;
+}
+
+.modal-hero:hover .modal-img {
+  transform: scale(1.05);
+}
+
+/* Gradient overlay so title text is readable on image */
+.modal-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 30%,
+    rgba(0, 0, 0, 0.85) 100%
+  );
+}
+
+/* Title positioned at bottom of hero image */
+.modal-hero-content {
+  position: absolute;
+  bottom: var(--space-lg);
+  left: var(--space-lg);
+  right: var(--space-lg);
+}
+
+.modal-tags {
+  display: flex;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.modal-tag {
+  padding: 3px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: rgba(255, 107, 53, 0.3);
+  border: 1px solid rgba(255, 107, 53, 0.5);
+  color: var(--color-accent);
+  backdrop-filter: blur(10px);
+}
+
+.modal-title {
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  color: white;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
+}
+
+/* Modal body */
+.modal-body {
+  padding: var(--space-lg);
+}
+
+/* Tab navigation */
+.modal-tabs {
+  display: flex;
+  gap: var(--space-xs);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--space-md);
+  margin-bottom: var(--space-lg);
+  overflow-x: auto; /* scroll on mobile if tabs overflow */
+}
+
+.modal-tab {
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  white-space: nowrap; /* don't wrap tab text */
+  transition: var(--transition-fast);
+}
+
+.modal-tab:hover {
+  color: var(--color-text-primary);
+  background: var(--color-bg-tertiary);
+}
+
+.modal-tab-active {
+  background: var(--color-accent);
+  color: white;
+}
+
+/* Tab panel content */
+.tab-panel {
+  animation: fadeIn 0.3s ease;
+}
+
+/* Ingredients list */
+.ingredients-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* 2 column grid */
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+.ingredient-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  font-size: 0.875rem;
+  transition: var(--transition-fast);
+}
+
+.ingredient-item:hover {
+  border-color: var(--color-accent);
+  transform: translateX(4px); /* slight nudge on hover */
+}
+
+.ingredient-measure {
+  color: var(--color-accent);
+  font-weight: 600;
+  white-space: nowrap;
+  font-size: 0.8rem;
+}
+
+/* Add to shopping list button */
+.btn-add-shopping {
+  width: 100%;
+  padding: var(--space-md);
+  background: var(--color-bg-glass);
+  border: 1px dashed var(--color-border-hover);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: var(--transition-fast);
+  backdrop-filter: blur(10px);
+}
+
+.btn-add-shopping:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background: var(--color-accent-glow);
+}
+
+/* Instructions text */
+.instructions-text {
+  font-size: 0.9rem;
+  line-height: 1.8;
+  color: var(--color-text-secondary);
+  white-space: pre-line; /* preserve line breaks from API */
+}
+
+/* Cook Mode */
+.cookmode {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.cookmode-step {
+  display: flex;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-accent);
+  transition: var(--transition-fast);
+}
+
+.cookmode-step-num {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  flex-shrink: 0;
+  width: 36px;
+  line-height: 1;
+}
+
+.cookmode-step-text {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+}
+
+/* Timer display */
+.cookmode-timer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.timer-display {
+  font-family: var(--font-body);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  min-width: 60px;
+}
+
+.timer-btn {
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--color-accent);
+  color: white;
+  transition: var(--transition-fast);
+}
+
+.timer-btn:hover {
+  background: var(--color-accent-hover);
+  transform: scale(1.05);
+}
+
+/* Modal footer */
+.modal-footer {
+  display: flex;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg) var(--space-lg);
+  border-top: 1px solid var(--color-border);
+}
+
+.btn-fav-modal,
+.btn-youtube {
+  flex: 1;
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
+.btn-fav-modal {
+  background: var(--color-accent-glow);
+  border: 1px solid rgba(255, 107, 53, 0.3);
+  color: var(--color-accent);
+}
+
+.btn-fav-modal:hover {
+  background: var(--color-accent);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.btn-fav-modal.is-fav {
+  background: var(--color-accent);
+  color: white;
+}
+
+.btn-fav-modal.is-fav span {
+  animation: heartBeat 0.6s ease;
+}
+
+.btn-youtube {
+  background: rgba(255, 0, 0, 0.1);
+  border: 1px solid rgba(255, 0, 0, 0.2);
+  color: #ff4444;
+}
+
+.btn-youtube:hover {
+  background: rgba(255, 0, 0, 0.2);
+  transform: translateY(-2px);
+}
+
+
+/* ============================================================
+   12. SIDEBARS (Favourites + Shopping List)
+============================================================ */
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: var(--sidebar-width);
+  max-width: 100vw; /* don't overflow on small screens */
+  height: 100vh;
+  background: var(--color-bg-secondary);
+  border-left: 1px solid var(--color-border);
+  z-index: 1500;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  /* Animation: slides in from the right */
+  animation: slideInRight 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-lg);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0; /* header never shrinks */
+}
+
+.sidebar-title {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.sidebar-close {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  transition: var(--transition-fast);
+}
+
+.sidebar-close:hover {
+  background: var(--color-danger);
+  color: white;
+}
+
+.sidebar-body {
+  flex: 1;          /* takes remaining height */
+  overflow-y: auto; /* scroll if content overflows */
+  padding: var(--space-md);
+}
+
+.sidebar-empty {
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  padding: var(--space-2xl) var(--space-md);
+}
+
+.sidebar-footer {
+  padding: var(--space-md);
+  border-top: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+/* Favourite card in sidebar */
+.fav-item {
+  display: flex;
+  gap: var(--space-md);
+  align-items: center;
+  padding: var(--space-sm);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  margin-bottom: var(--space-sm);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.fav-item:hover {
+  border-color: var(--color-border-hover);
+  background: var(--color-bg-tertiary);
+}
+
+.fav-item-img {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.fav-item-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  flex: 1;
+  /* 2-line clamp */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.fav-item-remove {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  flex-shrink: 0;
+  transition: var(--transition-fast);
+  padding: 4px;
+}
+
+.fav-item-remove:hover {
+  color: var(--color-danger);
+}
+
+/* Shopping list items */
+.shopping-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.875rem;
+  transition: var(--transition-fast);
+}
+
+.shopping-item:last-child {
+  border-bottom: none;
+}
+
+.shopping-check {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 2px solid var(--color-border-hover);
+  flex-shrink: 0;
+  transition: var(--transition-fast);
+  cursor: pointer;
+}
+
+.shopping-item.checked .shopping-check {
+  background: var(--color-success);
+  border-color: var(--color-success);
+}
+
+.shopping-item.checked .shopping-name {
+  text-decoration: line-through;
+  color: var(--color-text-muted);
+}
+
+.shopping-measure {
+  color: var(--color-accent);
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+/* Quick shop links to Zepto/Blinkit */
+.shop-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-sm);
+  transition: var(--transition-fast);
+}
+
+.shop-link:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background: var(--color-accent-glow);
+  transform: translateX(4px);
+}
+
+
+/* ============================================================
+   13. TOAST NOTIFICATIONS
+============================================================ */
+
+.toast-container {
+  position: fixed;
+  bottom: var(--space-xl);
+  right: var(--space-xl);
+  z-index: 3000; /* highest z-index — always on top */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  pointer-events: none; /* let clicks pass through the container */
+}
+
+.toast {
+  min-width: 260px;
+  max-width: 340px;
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  backdrop-filter: blur(20px);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-card);
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+
+  animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  /*
+    cubic-bezier(0.34, 1.56, 0.64, 1) = bounce curve
+    The 1.56 makes it go slightly past then settle — feels alive
+  */
+}
+
+/* Left border indicates toast type */
+.toast-success { border-left: 3px solid var(--color-success); }
+.toast-error   { border-left: 3px solid var(--color-danger);  }
+.toast-info    { border-left: 3px solid var(--color-accent);  }
+
+/* Fade out animation (added by JS before removing toast) */
+.toast.hiding {
+  animation: fadeIn 0.3s ease reverse; /* reverse = plays backwards = fade out */
+}
+
+
+/* ============================================================
+   14. PAGINATION
+============================================================ */
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-2xl) 0 var(--space-xl);
+}
+
+.page-btn {
+  min-width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  transition: var(--transition-fast);
+  padding: 0 var(--space-sm);
+}
+
+.page-btn:hover {
+  border-color: var(--color-border-hover);
+  color: var(--color-text-primary);
+}
+
+.page-btn-active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: white;
+  box-shadow: 0 4px 12px var(--color-accent-glow);
+}
+
+.page-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+
+/* ============================================================
+   15. EMPTY STATE
+============================================================ */
+
+.empty-state {
+  text-align: center;
+  padding: var(--space-3xl) var(--space-xl);
+  animation: fadeInUp 0.5s ease;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: var(--space-lg);
+  opacity: 0.4;
+  /* Bobbing animation */
+  animation: float 3s ease-in-out infinite;
+  display: block;
+}
+
+.empty-title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  margin-bottom: var(--space-sm);
+  color: var(--color-text-primary);
+}
+
+.empty-text {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+
+/* ============================================================
+   16. BACKDROP (behind sidebars)
+============================================================ */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 1400; /* above content, below sidebar (1500) */
+  animation: fadeIn 0.3s ease;
+}
+
+
+/* ============================================================
+   17. UTILITY CLASSES
+   
+   These are tiny single-purpose classes used everywhere.
+   .hidden is the most important — JS toggles this to show/hide elements.
+============================================================ */
+
+/* Hide element completely (removes from layout) */
+.hidden {
+  display: none !important;
+  /*
+    !important overrides any other display value.
+    This ensures .hidden always works regardless of other CSS.
+  */
+}
+
+/* Visually hidden but still in layout (for screen readers) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+
+/* ============================================================
+   18. RESPONSIVE DESIGN — MEDIA QUERIES
+   
+   We design MOBILE-FIRST — base styles work on small screens,
+   then we ADD styles for larger screens.
+   
+   But since this project started desktop, we ADD styles for
+   smaller screens using max-width (common for desktop-first).
+   
+   Breakpoints:
+   Tablet:  max-width: 768px
+   Mobile:  max-width: 480px
+============================================================ */
+
+/* ── Tablet ── */
+@media (max-width: 768px) {
+
+  /* Navbar: hide logo text, make search smaller */
+  .nav-logo-text {
+    display: none;
+  }
+
+  .search-wrapper {
+    max-width: none; /* take full width */
+  }
+
+  /* Hero: smaller text */
+  .hero-title {
+    font-size: 2.2rem;
+  }
+
+  /* Filter bar: wrap to multiple lines */
+  .filter-bar {
+    gap: var(--space-sm);
+  }
+
+  /* Cards: fewer columns */
+  .cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--space-md);
+  }
+
+  /* Sidebar: full width on tablet */
+  .sidebar {
+    width: 100%;
+  }
+
+  /* Modal: full screen on tablet */
+  .modal {
+    max-height: 100vh;
+    border-radius: 0;
+    margin: 0;
+  }
+
+  .modal-overlay {
+    padding: 0;
+    align-items: flex-end; /* slide up from bottom */
+  }
+
+  .modal {
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    animation: slideInUp 0.4s ease;
+  }
+}
+
+/* ── Mobile ── */
+@media (max-width: 480px) {
+
+  .navbar {
+    padding: 0 var(--space-md);
+    gap: var(--space-sm);
+  }
+
+  .main-content {
+    padding: var(--space-md);
+  }
+
+  /* 1 column grid on mobile */
+  .cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Hero chips: scroll horizontally */
+  .hero-chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: flex-start;
+    padding-bottom: var(--space-sm);
+
+    /* Hide scrollbar but keep functionality */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .hero-chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Ingredients: 1 column on mobile */
+  .ingredients-list {
+    grid-template-columns: 1fr;
+  }
+
+  /* Toast: full width on mobile */
+  .toast-container {
+    bottom: var(--space-md);
+    right: var(--space-md);
+    left: var(--space-md);
+  }
+
+  .toast {
+    max-width: 100%;
+    min-width: unset;
+    width: 100%;
+  }
+}
