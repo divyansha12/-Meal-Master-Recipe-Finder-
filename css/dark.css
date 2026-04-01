@@ -1,25 +1,3 @@
-/* ============================================================
-   MEAL MASTER — dark.css
-   Light Mode Theme Overrides
-
-   HOW THIS WORKS:
-   Our style.css defines dark mode as the DEFAULT (all the
-   --color-* variables are dark colors).
-
-   This file redefines those SAME variable names but with
-   light values. Since these rules apply when body does NOT
-   have the .dark-mode class, removing .dark-mode from body
-   automatically switches every element to light mode.
-
-   We NEVER have to change any individual element's color —
-   just the variables. This is the power of CSS variables.
-
-   JS (FavController.js) will:
-   1. Read saved theme from localStorage
-   2. Add or remove .dark-mode on document.body
-   3. Toggle between these two variable sets
-============================================================ */
-
 /*
   body:not(.dark-mode) means:
   "apply these styles when body does NOT have the class dark-mode"
